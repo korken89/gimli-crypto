@@ -1,0 +1,28 @@
+[package]
+name = "gimli-crypto"
+version = "0.1.0"
+edition = "2024"
+authors = ["Emil Fresk <emil.fresk@gmail.com"]
+license = "MIT OR Apache-2.0"
+description = "A no_std implementation of Gimli AEAD cipher and hash function"
+readme = "README.md"
+repository = "https://github.com/korken89/gimli-crypto"
+keywords = ["crypto", "aead", "hash", "gimli", "no-std"]
+categories = ["cryptography", "no-std"]
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+aead = { version = "0.5.2", default-features = false }
+digest = { version = "0.10.7" }
+subtle = { version = "2.6", default-features = false }
+zeroize = { version = "1.8", default-features = false, features = ["derive"] }
+
+
+[features]
+default = []
+
+alloc = ["aead/alloc"]
+heapless = ["aead/heapless"]
+getrandom = ["aead/getrandom"]
