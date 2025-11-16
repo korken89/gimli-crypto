@@ -136,7 +136,17 @@ fn parse_test_vectors() -> Vec<TestVector> {
 fn test_all_official_vectors() {
     let vectors = parse_test_vectors();
 
-    for vector in &vectors {
+    // Under miri, only test every 20th vector to keep test time reasonable
+    // Full coverage is still validated in regular test runs
+    #[cfg(miri)]
+    let test_vectors = vectors.iter().step_by(20);
+    #[cfg(miri)]
+    let test_vectors_len = test_vectors.clone().count();
+
+    #[cfg(not(miri))]
+    let test_vectors = vectors.iter();
+
+    for vector in test_vectors {
         // Encrypt in-place
         let mut buffer = vector.plaintext.clone();
         let tag = encrypt_in_place(
@@ -189,6 +199,14 @@ fn test_all_official_vectors() {
         );
     }
 
+    #[cfg(miri)]
+    println!(
+        "Successfully tested {} of {} test vectors under miri",
+        test_vectors_len,
+        vectors.len()
+    );
+
+    #[cfg(not(miri))]
     println!("Successfully tested {} test vectors", vectors.len());
 }
 
