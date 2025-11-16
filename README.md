@@ -1,5 +1,9 @@
 # gimli-crypto
 
+[![Crates.io](https://img.shields.io/crates/v/gimli-crypto.svg)](https://crates.io/crates/gimli-crypto)
+[![Documentation](https://docs.rs/gimli-crypto/badge.svg)](https://docs.rs/gimli-crypto)
+[![License](https://img.shields.io/crates/l/gimli-crypto.svg)](https://github.com/korken89/gimli-crypto#license)
+
 A `no_std` compatible Rust implementation of the Gimli cryptographic permutation and its applications:
 - AEAD (`aead/gimli24v1`): Authenticated Encryption with Associated Data
 - Hash (`hash/gimli24v1`): Cryptographic hash function
