@@ -144,8 +144,8 @@ impl Hasher {
             // Full buffer, absorb it.
             if self.buffer_len == RATE {
                 let state_bytes = self.state.as_bytes_mut();
-                for i in 0..RATE {
-                    state_bytes[i] ^= self.buffer[i];
+                for (i, byte) in self.buffer.iter().enumerate().take(RATE) {
+                    state_bytes[i] ^= byte;
                 }
                 gimli(&mut self.state);
 
@@ -158,8 +158,8 @@ impl Hasher {
     pub fn finalize(mut self) -> [u8; HASH_SIZE] {
         // Process buffered data with padding.
         let state_bytes = self.state.as_bytes_mut();
-        for i in 0..self.buffer_len {
-            state_bytes[i] ^= self.buffer[i];
+        for (i, byte) in self.buffer.iter().enumerate().take(self.buffer_len) {
+            state_bytes[i] ^= byte;
         }
 
         // Padding: domain separation at current position, padding marker at end of rate.

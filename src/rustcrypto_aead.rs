@@ -134,7 +134,7 @@ mod tests {
         let plaintext = *b"Hello, RustCrypto AEAD!";
         let aad = b"associated data";
 
-        let mut ciphertext = plaintext.clone();
+        let mut ciphertext = plaintext;
         let tag = cipher
             .encrypt_in_place_detached(&nonce, aad, &mut ciphertext)
             .expect("encryption failed");
