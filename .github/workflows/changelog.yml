@@ -1,0 +1,21 @@
+name: Changelog
+
+on:
+  pull_request:
+    types: [opened, reopened, labeled, unlabeled, synchronize]
+
+jobs:
+  changelog:
+    name: Changelog
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: dangoslen/changelog-enforcer@v3
+      with:
+        changeLogPath: CHANGELOG.md
+        skipLabels: "skip-changelog"
+        missingUpdateErrorMessage: "Please add a changelog entry in the CHANGELOG.md file"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
