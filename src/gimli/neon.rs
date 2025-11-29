@@ -9,11 +9,8 @@
 //!
 //! This allows all 4 columns to be processed in parallel.
 
-use super::State;
+use super::{ROUND_CONSTANT, ROUNDS, State};
 use core::arch::aarch64::*;
-
-/// Number of rounds in Gimli permutation.
-const ROUNDS: usize = 24;
 
 /// Apply the Gimli permutation using NEON SIMD.
 ///
@@ -50,23 +47,20 @@ pub(crate) unsafe fn gimli(state: &mut State) {
             // row0 = z ^ y ^ ((x & y) << 3)
             row0 = veorq_u32(veorq_u32(z, y), vshlq_n_u32(vandq_u32(x, y), 3));
 
-            // Small swap: rounds 24, 20, 16, 12, 8, 4
-            // Swap adjacent pairs in row0: [0,1,2,3] -> [1,0,3,2]
+            // Small swap + round constant: rounds 24, 20, 16, 12, 8, 4.
             if round & 3 == 0 {
+                // Swap adjacent pairs in row0: [0,1,2,3] -> [1,0,3,2]
                 row0 = vrev64q_u32(row0);
+
+                let constant = ROUND_CONSTANT | round;
+                let const_vec = vsetq_lane_u32(constant, vdupq_n_u32(0), 0);
+                row0 = veorq_u32(row0, const_vec);
             }
 
             // Big swap: rounds 22, 18, 14, 10, 6, 2
-            // Swap halves in row0: [0,1,2,3] -> [2,3,0,1]
             if round & 3 == 2 {
+                // Swap halves in row0: [0,1,2,3] -> [2,3,0,1]
                 row0 = vextq_u32(row0, row0, 2);
-            }
-
-            // Add round constant: only on round multiples of 4
-            if round & 3 == 0 {
-                let constant = 0x9e377900u32 | round as u32;
-                let const_vec = vsetq_lane_u32(constant, vdupq_n_u32(0), 0);
-                row0 = veorq_u32(row0, const_vec);
             }
         }
 

@@ -7,9 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
 ### Added
+
 - ARM NEON SIMD implementation for aarch64 targets
 - x86-64 SSE2 SIMD implementation for x86_64 targets
+
+### Changed
+
+- Refactored GIMLI permutation and associated constants for better clarity.
 
 ## [0.1.1] - 2025-01-27
 
