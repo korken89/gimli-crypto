@@ -9,11 +9,8 @@
 //!
 //! This allows all 4 columns to be processed in parallel.
 
-use super::State;
+use super::{ROUND_CONSTANT, ROUNDS, State};
 use core::arch::x86_64::*;
-
-/// Number of rounds in Gimli permutation.
-const ROUNDS: usize = 24;
 
 /// Apply the Gimli permutation using SSE2 SIMD.
 ///
@@ -52,27 +49,26 @@ pub(crate) unsafe fn gimli(state: &mut State) {
             // row0 = z ^ y ^ ((x & y) << 3)
             row0 = _mm_xor_si128(_mm_xor_si128(z, y), _mm_slli_epi32(_mm_and_si128(x, y), 3));
 
-            // Small swap: rounds 24, 20, 16, 12, 8, 4
-            // Swap adjacent pairs in row0: [0,1,2,3] -> [1,0,3,2]
-            // Shuffle pattern: 0xB1 = 0b10_11_00_01 = [1,0,3,2]
+            // Small swap + round constant: rounds 24, 20, 16, 12, 8, 4.
             if round & 3 == 0 {
+                // Swap adjacent pairs in row0: [0,1,2,3] -> [1,0,3,2]
+                // Shuffle pattern: 0xB1 = 0b10_11_00_01 = [1,0,3,2]
                 row0 = _mm_shuffle_epi32(row0, 0xB1);
-            }
 
-            // Big swap: rounds 22, 18, 14, 10, 6, 2
-            // Swap halves in row0: [0,1,2,3] -> [2,3,0,1]
-            // Shuffle pattern: 0x4E = 0b01_00_11_10 = [2,3,0,1]
-            if round & 3 == 2 {
-                row0 = _mm_shuffle_epi32(row0, 0x4E);
-            }
-
-            // Add round constant: only on round multiples of 4
-            if round & 3 == 0 {
-                let constant = 0x9e377900u32 | round as u32;
+                let constant = ROUND_CONSTANT | round;
                 // Create a vector with constant in first lane, zeros elsewhere
                 let const_vec = _mm_set_epi32(0, 0, 0, constant as i32);
                 row0 = _mm_xor_si128(row0, const_vec);
             }
+
+            // Big swap: rounds 22, 18, 14, 10, 6, 2
+            if round & 3 == 2 {
+                // Swap halves in row0: [0,1,2,3] -> [2,3,0,1]
+                // Shuffle pattern: 0x4E = 0b01_00_11_10 = [2,3,0,1]
+                row0 = _mm_shuffle_epi32(row0, 0x4E);
+            }
+
+            if round & 3 == 0 {}
         }
 
         // Store results back to state
