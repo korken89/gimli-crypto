@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+### Changed
+
+## [0.2.0] - 2025-11-30
+
+### Added
+
 - ARM NEON SIMD implementation for aarch64 targets
 - x86-64 SSE2 SIMD implementation for x86_64 targets
 
@@ -18,9 +24,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Refactored GIMLI permutation and associated constants for better clarity.
 
-## [0.1.1] - 2025-01-27
+## [0.1.1] - 2025-11-16
 
 Initial public release.
 
-[Unreleased]: https://github.com/korken89/gimli-crypto/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/korken89/gimli-crypto/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/korken89/gimli-crypto/releases/tag/v0.2.0
 [0.1.1]: https://github.com/korken89/gimli-crypto/releases/tag/v0.1.1
