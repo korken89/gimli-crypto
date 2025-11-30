@@ -67,8 +67,6 @@ pub(crate) unsafe fn gimli(state: &mut State) {
                 // Shuffle pattern: 0x4E = 0b01_00_11_10 = [2,3,0,1]
                 row0 = _mm_shuffle_epi32(row0, 0x4E);
             }
-
-            if round & 3 == 0 {}
         }
 
         // Store results back to state
