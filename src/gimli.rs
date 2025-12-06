@@ -12,7 +12,7 @@ pub(crate) const ROUND_CONSTANT: u32 = 0x9e37_7900;
 
 #[cfg(target_arch = "aarch64")]
 mod neon;
-#[cfg(any(not(any(target_arch = "aarch64", target_arch = "x86_64")), test))]
+// Always compile portable for benchmarking comparison
 mod portable;
 #[cfg(target_arch = "x86_64")]
 mod sse2;
@@ -23,18 +23,18 @@ mod sse2;
 /// On x86_64 targets, this automatically uses the SSE2 SIMD implementation.
 /// On other targets, it uses the portable implementation.
 #[derive(Clone, Zeroize, ZeroizeOnDrop)]
-pub(crate) struct State(pub(crate) [u32; 12]);
+pub struct State(pub(crate) [u32; 12]);
 
 impl State {
     /// Create a new state.
     #[inline(always)]
-    pub(crate) const fn new() -> Self {
+    pub const fn new() -> Self {
         Self([0; 12])
     }
 
     /// Get a mutable view of the state as bytes.
     #[inline(always)]
-    pub(crate) const fn as_bytes_mut(&mut self) -> &mut [u8; 48] {
+    pub const fn as_bytes_mut(&mut self) -> &mut [u8; 48] {
         // SAFETY: This is safe because:
         // - `[u32; 12]` and `[u8; 48]` have the same size (48 bytes).
         // - Both types have the same alignment requirements, the source is only stricter.
@@ -45,7 +45,7 @@ impl State {
 
     /// Get an immutable view of the state as bytes.
     #[inline(always)]
-    pub(crate) const fn as_bytes(&self) -> &[u8; 48] {
+    pub const fn as_bytes(&self) -> &[u8; 48] {
         // SAFETY: This is safe because:
         // - `[u32; 12]` and `[u8; 48]` have the same size (48 bytes).
         // - Both types have the same alignment requirements, the source is only stricter.
@@ -80,4 +80,40 @@ pub(crate) fn gimli(state: &mut State) {
 #[inline(always)]
 pub(crate) fn gimli(state: &mut State) {
     portable::gimli(state);
+}
+
+// Public benchmarking functions to compare implementations
+#[doc(hidden)]
+pub mod bench {
+    pub use super::State;
+
+    /// Apply Gimli permutation using portable implementation (for benchmarking).
+    pub fn gimli_portable(state: &mut State) {
+        super::portable::gimli(state);
+    }
+
+    /// Apply Gimli permutation using SIMD implementation (for benchmarking).
+    #[cfg(target_arch = "x86_64")]
+    pub fn gimli_simd(state: &mut State) {
+        // SAFETY: SSE2 is available on all x86_64 targets
+        unsafe {
+            super::sse2::gimli(state);
+        }
+    }
+
+    /// Apply Gimli permutation using SIMD implementation (for benchmarking).
+    #[cfg(target_arch = "aarch64")]
+    pub fn gimli_simd(state: &mut State) {
+        // SAFETY: NEON is available on all aarch64 targets
+        unsafe {
+            super::neon::gimli(state);
+        }
+    }
+
+    /// Apply Gimli permutation using SIMD implementation (for benchmarking).
+    #[cfg(not(any(target_arch = "aarch64", target_arch = "x86_64")))]
+    pub fn gimli_simd(state: &mut State) {
+        // On non-SIMD architectures, this is the same as portable
+        super::portable::gimli(state);
+    }
 }

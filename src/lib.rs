@@ -16,6 +16,10 @@ pub use rustcrypto_hash::GimliHash;
 pub use aead::{self, AeadInPlace, KeyInit}; // For `GimliAead` users
 pub use digest::{self, Digest, Update}; // For `GimpiHash` users
 
+// Expose benchmarking module (hidden from docs)
+#[doc(hidden)]
+pub use gimli::bench;
+
 /// Gimli state size in bytes (48 bytes = 12 u32 words).
 const STATE_SIZE: usize = 48;
 
